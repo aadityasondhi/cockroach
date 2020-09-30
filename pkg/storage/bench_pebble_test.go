@@ -65,7 +65,7 @@ func setupMVCCInMemPebble(b testing.TB, loc string) Engine {
 }
 
 func BenchmarkMVCCScan_Pebble(b *testing.B) {
-	skip.WithIssue(b, 51840, "TODO: fix benchmark")
+	//skip.WithIssue(b, 51840, "TODO: fix benchmark")
 
 	ctx := context.Background()
 	for _, numRows := range []int{1, 10, 100, 1000, 10000} {
