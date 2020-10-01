@@ -649,7 +649,7 @@ func (p *pebbleMVCCScanner) updateCurrent() bool {
 	p.curRawKey = p.parent.UnsafeRawKey()
 
 	var err error
-	p.curKey, err = DecodeMVCCKey(p.curRawKey)
+	p.curKey.Key, p.curKey.Timestamp, err = enginepb.DecodeKey(p.curRawKey)
 	if err != nil {
 		panic(err)
 	}
