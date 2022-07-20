@@ -366,9 +366,11 @@ func TestServerDump(t *testing.T) {
 	valueCount := numPointsEachHour * slabCount
 	// We'll dump [startVal, endVal) below. To simplify the test, pick them
 	// according to a slab boundary.
-	startSlab, endSlab := 2, 4
-	startVal := numPointsEachHour * startSlab
-	endVal := numPointsEachHour * endSlab
+	//startSlab, endSlab := 2, 4
+	//startVal := numPointsEachHour * startSlab
+	//endVal := numPointsEachHour * endSlab
+	startVal := 77 // 72
+	endVal := 140  // 144
 
 	// Generate expected data.
 	expectedMap := make(map[string]map[string]tspb.TimeSeriesData)
@@ -379,12 +381,12 @@ func TestServerDump(t *testing.T) {
 			sourceMap[sourceName(source)] = tspb.TimeSeriesData{
 				Name:       seriesName(series),
 				Source:     sourceName(source),
-				Datapoints: generateTimeSeriesDatapoints(startVal, endVal),
+				Datapoints: generateTimeSeriesDatapoints(72, 144),
 			}
 		}
 	}
 
-	expTotalMsgCount := seriesCount * sourceCount * (endSlab - startSlab)
+	expTotalMsgCount := seriesCount * sourceCount * (4 - 2)
 
 	s, _, _ := serverutils.StartServer(t, base.TestServerArgs{
 		Knobs: base.TestingKnobs{
