@@ -321,6 +321,7 @@ func init() {
 		// Logging configuration.
 		cliflagcfg.VarFlag(pf, &stringValue{settableString: &cliCtx.logConfigInput}, cliflags.Log)
 		cliflagcfg.VarFlag(pf, &fileContentsValue{settableString: &cliCtx.logConfigInput, fileName: "<unset>"}, cliflags.LogConfigFile)
+		cliflagcfg.VarFlag(pf, &stringValue{settableString: &cliCtx.logConfigFile}, cliflags.LogConfigFile)
 
 		// Pre-v21.1 overrides. Deprecated.
 		// TODO(knz): Remove this.

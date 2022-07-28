@@ -1038,7 +1038,8 @@ func (c *Config) String() string {
 // which pretty-prints the configuration using the "flow" format.
 // The "flow" format is useful for the output of --help.
 type Holder struct {
-	Config Config `yaml:",flow"`
+	Config     Config `yaml:",flow"`
+	ConfigFile string
 }
 
 // String implements the pflag.Value interface.

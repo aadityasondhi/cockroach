@@ -333,6 +333,23 @@ func ApplyConfig(config logconfig.Config) (logShutdownFn func(), err error) {
 	return logShutdownFn, nil
 }
 
+// updateConfig
+//
+//
+func updateConfig() error {
+	// Step 1 load new config
+
+	// Step 2 apply config
+	// 		step 2.1 buffer incoming logs
+	//    step 2.2 flush old sinks
+	// 		step 2.3 create new sinks
+	//		step 2.4 hold mutex
+	//    step 2.5 flush log buffer
+	//    step 2.6 release mutex
+
+	return nil
+}
+
 // newFileSinkInfo creates a new fileSink and its accompanying sinkInfo
 // from the provided configuration.
 func newFileSinkInfo(

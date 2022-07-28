@@ -179,6 +179,8 @@ type cliContext struct {
 
 	// logConfigInput is the YAML input for the logging configuration.
 	logConfigInput settableString
+	// logConfigFile is the file used for the logging configuration
+	logConfigFile settableString
 	// logConfig is the resulting logging configuration after the input
 	// configuration has been parsed and validated.
 	logConfig logconfig.Config

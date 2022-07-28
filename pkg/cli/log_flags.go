@@ -49,7 +49,6 @@ func setupLogging(ctx context.Context, cmd *cobra.Command, isServerCmd, applyCon
 	if active, firstUse := log.IsActive(); active {
 		panic(errors.Newf("logging already active; first used at:\n%s", firstUse))
 	}
-
 	// Try to derive a default directory from the first store,
 	// if we have a server command.
 	var firstStoreDir *string
