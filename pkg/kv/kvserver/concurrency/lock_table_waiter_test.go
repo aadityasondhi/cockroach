@@ -996,9 +996,13 @@ func TestContentionEventTracer(t *testing.T) {
 	require.Equal(t, roachpb.Key("a"), events[0].Key)
 	require.NotZero(t, events[0].Duration)
 
+	time.Sleep(10 * time.Second)
+	kv := h.tag.Render()
 	h.notify(ctx, waitingState{kind: doneWaiting})
 	require.NotZero(t, h.tag.mu.lockWait)
 	require.Len(t, events, 2)
+	fmt.Printf("wait time in memory: %s \n", h.tag.mu.lockWait.String())
+	fmt.Printf("wait time in lazy tag: %s \n", kv[1].Value.Emit())
 
 	lockWaitBefore := h.tag.mu.lockWait
 	h.notify(ctx, waitingState{
