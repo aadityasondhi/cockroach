@@ -8,6 +8,7 @@ go_library(
     srcs = [
         "doc.go",
         "graphite_exporter.go",
+        "histogram_buckets.go",
         "metric.go",
         "prometheus_exporter.go",
         "prometheus_rule_exporter.go",

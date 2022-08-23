@@ -26,12 +26,12 @@ type DistSQLMetrics struct {
 	FlowsTotal            *metric.Counter
 	FlowsQueued           *metric.Gauge
 	FlowsScheduled        *metric.Counter
-	QueueWaitHist         *metric.Histogram
-	MaxBytesHist          *metric.Histogram
+	QueueWaitHist         *metric.HistogramV2
+	MaxBytesHist          *metric.HistogramV2
 	CurBytesCount         *metric.Gauge
 	VecOpenFDs            *metric.Gauge
 	CurDiskBytesCount     *metric.Gauge
-	MaxDiskBytesHist      *metric.Histogram
+	MaxDiskBytesHist      *metric.HistogramV2
 	QueriesSpilled        *metric.Counter
 	SpilledBytesWritten   *metric.Counter
 	SpilledBytesRead      *metric.Counter
@@ -155,12 +155,12 @@ func MakeDistSQLMetrics(histogramWindow time.Duration) DistSQLMetrics {
 		FlowsTotal:            metric.NewCounter(metaFlowsTotal),
 		FlowsQueued:           metric.NewGauge(metaFlowsQueued),
 		FlowsScheduled:        metric.NewCounter(metaFlowsScheduled),
-		QueueWaitHist:         metric.NewLatency(metaQueueWaitHist, histogramWindow),
-		MaxBytesHist:          metric.NewHistogram(metaMemMaxBytes, histogramWindow, log10int64times1000, 3),
+		QueueWaitHist:         metric.NewHistogramV2(metaQueueWaitHist, histogramWindow, metric.IOLatencyBuckets),
+		MaxBytesHist:          metric.NewHistogramV2(metaMemMaxBytes, histogramWindow, metric.MemoryUsageBuckets),
 		CurBytesCount:         metric.NewGauge(metaMemCurBytes),
 		VecOpenFDs:            metric.NewGauge(metaVecOpenFDs),
 		CurDiskBytesCount:     metric.NewGauge(metaDiskCurBytes),
-		MaxDiskBytesHist:      metric.NewHistogram(metaDiskMaxBytes, histogramWindow, log10int64times1000, 3),
+		MaxDiskBytesHist:      metric.NewHistogramV2(metaDiskMaxBytes, histogramWindow, metric.MemoryUsageBuckets),
 		QueriesSpilled:        metric.NewCounter(metaQueriesSpilled),
 		SpilledBytesWritten:   metric.NewCounter(metaSpilledBytesWritten),
 		SpilledBytesRead:      metric.NewCounter(metaSpilledBytesRead),

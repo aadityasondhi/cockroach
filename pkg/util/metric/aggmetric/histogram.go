@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/util/metric"
-	"github.com/codahale/hdrhistogram"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 )
 
@@ -23,8 +22,8 @@ import (
 // children, while its children are additionally exported to prometheus via the
 // PrometheusIterable interface.
 type AggHistogram struct {
-	h      metric.Histogram
-	create func() *metric.Histogram
+	h      metric.HistogramV2
+	create func() *metric.HistogramV2
 	childSet
 }
 
@@ -34,14 +33,10 @@ var _ metric.PrometheusExportable = (*AggHistogram)(nil)
 
 // NewHistogram constructs a new AggHistogram.
 func NewHistogram(
-	metadata metric.Metadata,
-	duration time.Duration,
-	maxVal int64,
-	sigFigs int,
-	childLabels ...string,
+	metadata metric.Metadata, duration time.Duration, buckets []float64, childLabels ...string,
 ) *AggHistogram {
-	create := func() *metric.Histogram {
-		return metric.NewHistogram(metadata, duration, maxVal, sigFigs)
+	create := func() *metric.HistogramV2 {
+		return metric.NewHistogramV2(metadata, duration, buckets)
 	}
 	a := &AggHistogram{
 		h:      *create(),
@@ -84,11 +79,11 @@ func (a *AggHistogram) ToPrometheusMetric() *io_prometheus_client.Metric {
 	return a.h.ToPrometheusMetric()
 }
 
-// Windowed returns a copy of the current windowed histogram data and its
-// rotation interval.
-func (a *AggHistogram) Windowed() (*hdrhistogram.Histogram, time.Duration) {
-	return a.h.Windowed()
-}
+//// Windowed returns a copy of the current windowed histogram data and its
+//// rotation interval.
+//func (a *AggHistogram) Windowed() prometheus.Histogram {
+//	return a.h.Windowed()
+//}
 
 // AddChild adds a Counter to this AggCounter. This method panics if a Counter
 // already exists for this set of labelVals.
@@ -109,7 +104,7 @@ func (a *AggHistogram) AddChild(labelVals ...string) *Histogram {
 type Histogram struct {
 	parent *AggHistogram
 	labelValuesSlice
-	h metric.Histogram
+	h metric.HistogramV2
 }
 
 // ToPrometheusMetric constructs a prometheus metric for this Histogram.

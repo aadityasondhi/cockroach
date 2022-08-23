@@ -129,10 +129,10 @@ var (
 type Metrics struct {
 	ReadProbeAttempts  *metric.Counter
 	ReadProbeFailures  *metric.Counter
-	ReadProbeLatency   *metric.Histogram
+	ReadProbeLatency   *metric.HistogramV2
 	WriteProbeAttempts *metric.Counter
 	WriteProbeFailures *metric.Counter
-	WriteProbeLatency  *metric.Histogram
+	WriteProbeLatency  *metric.HistogramV2
 	ProbePlanAttempts  *metric.Counter
 	ProbePlanFailures  *metric.Counter
 }
@@ -214,14 +214,18 @@ func NewProber(opts Opts) *Prober {
 		writePlanner: newMeta2Planner(opts.DB, opts.Settings, func() time.Duration { return writeInterval.Get(&opts.Settings.SV) }),
 
 		metrics: Metrics{
-			ReadProbeAttempts:  metric.NewCounter(metaReadProbeAttempts),
-			ReadProbeFailures:  metric.NewCounter(metaReadProbeFailures),
-			ReadProbeLatency:   metric.NewLatency(metaReadProbeLatency, opts.HistogramWindowInterval),
+			ReadProbeAttempts: metric.NewCounter(metaReadProbeAttempts),
+			ReadProbeFailures: metric.NewCounter(metaReadProbeFailures),
+			ReadProbeLatency: metric.NewHistogramV2(
+				metaReadProbeLatency, opts.HistogramWindowInterval, metric.IOLatencyBuckets,
+			),
 			WriteProbeAttempts: metric.NewCounter(metaWriteProbeAttempts),
 			WriteProbeFailures: metric.NewCounter(metaWriteProbeFailures),
-			WriteProbeLatency:  metric.NewLatency(metaWriteProbeLatency, opts.HistogramWindowInterval),
-			ProbePlanAttempts:  metric.NewCounter(metaProbePlanAttempts),
-			ProbePlanFailures:  metric.NewCounter(metaProbePlanFailures),
+			WriteProbeLatency: metric.NewHistogramV2(
+				metaWriteProbeLatency, opts.HistogramWindowInterval, metric.IOLatencyBuckets,
+			),
+			ProbePlanAttempts: metric.NewCounter(metaProbePlanAttempts),
+			ProbePlanFailures: metric.NewCounter(metaProbePlanFailures),
 		},
 		tracer: opts.Tracer,
 	}

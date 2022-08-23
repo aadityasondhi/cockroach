@@ -24,19 +24,19 @@ type metrics struct {
 	RoutingErrCount        *metric.Counter
 	RefusedConnCount       *metric.Counter
 	SuccessfulConnCount    *metric.Counter
-	ConnectionLatency      *metric.Histogram
+	ConnectionLatency      *metric.HistogramV2
 	AuthFailedCount        *metric.Counter
 	ExpiredClientConnCount *metric.Counter
 
-	DialTenantLatency *metric.Histogram
+	DialTenantLatency *metric.HistogramV2
 	DialTenantRetries *metric.Counter
 
 	ConnMigrationSuccessCount                *metric.Counter
 	ConnMigrationErrorFatalCount             *metric.Counter
 	ConnMigrationErrorRecoverableCount       *metric.Counter
 	ConnMigrationAttemptedCount              *metric.Counter
-	ConnMigrationAttemptedLatency            *metric.Histogram
-	ConnMigrationTransferResponseMessageSize *metric.Histogram
+	ConnMigrationAttemptedLatency            *metric.HistogramV2
+	ConnMigrationTransferResponseMessageSize *metric.HistogramV2
 
 	QueryCancelReceivedPGWire *metric.Counter
 	QueryCancelReceivedHTTP   *metric.Counter
@@ -224,16 +224,18 @@ func makeProxyMetrics() metrics {
 		RoutingErrCount:        metric.NewCounter(metaRoutingErrCount),
 		RefusedConnCount:       metric.NewCounter(metaRefusedConnCount),
 		SuccessfulConnCount:    metric.NewCounter(metaSuccessfulConnCount),
-		ConnectionLatency: metric.NewLatency(
+		ConnectionLatency: metric.NewHistogramV2(
 			metaConnMigrationAttemptedCount,
 			base.DefaultHistogramWindowInterval(),
+			metric.IOLatencyBuckets,
 		),
 		AuthFailedCount:        metric.NewCounter(metaAuthFailedCount),
 		ExpiredClientConnCount: metric.NewCounter(metaExpiredClientConnCount),
 		// Connector metrics.
-		DialTenantLatency: metric.NewLatency(
+		DialTenantLatency: metric.NewHistogramV2(
 			metaDialTenantLatency,
 			base.DefaultHistogramWindowInterval(),
+			metric.NetworkLatencyBuckets,
 		),
 		DialTenantRetries: metric.NewCounter(metaDialTenantRetries),
 		// Connection migration metrics.
@@ -241,15 +243,15 @@ func makeProxyMetrics() metrics {
 		ConnMigrationErrorFatalCount:       metric.NewCounter(metaConnMigrationErrorFatalCount),
 		ConnMigrationErrorRecoverableCount: metric.NewCounter(metaConnMigrationErrorRecoverableCount),
 		ConnMigrationAttemptedCount:        metric.NewCounter(metaConnMigrationAttemptedCount),
-		ConnMigrationAttemptedLatency: metric.NewLatency(
+		ConnMigrationAttemptedLatency: metric.NewHistogramV2(
 			metaConnMigrationAttemptedLatency,
 			base.DefaultHistogramWindowInterval(),
+			metric.NetworkLatencyBuckets,
 		),
-		ConnMigrationTransferResponseMessageSize: metric.NewHistogram(
+		ConnMigrationTransferResponseMessageSize: metric.NewHistogramV2(
 			metaConnMigrationTransferResponseMessageSize,
 			base.DefaultHistogramWindowInterval(),
-			maxExpectedTransferResponseMessageSize,
-			1,
+			metric.DataSizeBuckets,
 		),
 		QueryCancelReceivedPGWire: metric.NewCounter(metaQueryCancelReceivedPGWire),
 		QueryCancelReceivedHTTP:   metric.NewCounter(metaQueryCancelReceivedHTTP),

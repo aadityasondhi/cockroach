@@ -144,7 +144,7 @@ type Metrics struct {
 	HeartbeatSuccesses *metric.Counter
 	HeartbeatFailures  telemetry.CounterWithMetric
 	EpochIncrements    telemetry.CounterWithMetric
-	HeartbeatLatency   *metric.Histogram
+	HeartbeatLatency   *metric.HistogramV2
 }
 
 // IsLiveCallback is invoked when a node's IsLive state changes to true.
@@ -309,7 +309,9 @@ func NewNodeLiveness(opts NodeLivenessOptions) *NodeLiveness {
 		HeartbeatSuccesses: metric.NewCounter(metaHeartbeatSuccesses),
 		HeartbeatFailures:  telemetry.NewCounterWithMetric(metaHeartbeatFailures),
 		EpochIncrements:    telemetry.NewCounterWithMetric(metaEpochIncrements),
-		HeartbeatLatency:   metric.NewLatency(metaHeartbeatLatency, opts.HistogramWindowInterval),
+		HeartbeatLatency: metric.NewHistogramV2(
+			metaHeartbeatLatency, opts.HistogramWindowInterval, metric.IOLatencyBuckets,
+		),
 	}
 	nl.mu.nodes = make(map[roachpb.NodeID]Record)
 	nl.heartbeatToken <- struct{}{}

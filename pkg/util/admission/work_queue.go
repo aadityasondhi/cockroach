@@ -1525,7 +1525,7 @@ type WorkQueueMetrics struct {
 	Admitted        *metric.Counter
 	Errored         *metric.Counter
 	WaitDurationSum *metric.Counter
-	WaitDurations   *metric.Histogram
+	WaitDurations   *metric.HistogramV2
 	WaitQueueLength *metric.Gauge
 }
 
@@ -1538,8 +1538,9 @@ func makeWorkQueueMetrics(name string) WorkQueueMetrics {
 		Admitted:        metric.NewCounter(addName(name, admittedMeta)),
 		Errored:         metric.NewCounter(addName(name, erroredMeta)),
 		WaitDurationSum: metric.NewCounter(addName(name, waitDurationSumMeta)),
-		WaitDurations: metric.NewLatency(
-			addName(name, waitDurationsMeta), base.DefaultHistogramWindowInterval()),
+		WaitDurations: metric.NewHistogramV2(
+			addName(name, waitDurationsMeta), base.DefaultHistogramWindowInterval(), metric.IOLatencyBuckets,
+		),
 		WaitQueueLength: metric.NewGauge(addName(name, waitQueueLengthMeta)),
 	}
 }

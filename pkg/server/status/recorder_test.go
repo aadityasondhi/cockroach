@@ -287,7 +287,7 @@ func TestMetricsRecorder(t *testing.T) {
 				c.Inc((data.val))
 				addExpected(reg.prefix, data.name, reg.source, 100, data.val, reg.isNode)
 			case "histogram":
-				h := metric.NewHistogram(metric.Metadata{Name: reg.prefix + data.name}, time.Second, 1000, 2)
+				h := metric.NewHistogramV2(metric.Metadata{Name: reg.prefix + data.name}, time.Second, metric.CountBuckets)
 				reg.reg.AddMetric(h)
 				h.RecordValue(data.val)
 				for _, q := range recordHistogramQuantiles {
@@ -295,7 +295,9 @@ func TestMetricsRecorder(t *testing.T) {
 				}
 				addExpected(reg.prefix, data.name+"-count", reg.source, 100, 1, reg.isNode)
 			case "latency":
-				l := metric.NewLatency(metric.Metadata{Name: reg.prefix + data.name}, time.Hour)
+				l := metric.NewHistogramV2(
+					metric.Metadata{Name: reg.prefix + data.name}, time.Hour, metric.IOLatencyBuckets,
+				)
 				reg.reg.AddMetric(l)
 				l.RecordValue(data.val)
 				// Latency is simply three histograms (at different resolution

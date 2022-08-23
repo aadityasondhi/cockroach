@@ -1737,15 +1737,15 @@ type StoreMetrics struct {
 
 	// Raft processing metrics.
 	RaftTicks                 *metric.Counter
-	RaftQuotaPoolPercentUsed  *metric.Histogram
+	RaftQuotaPoolPercentUsed  *metric.HistogramV2
 	RaftWorkingDurationNanos  *metric.Counter
 	RaftTickingDurationNanos  *metric.Counter
 	RaftCommandsApplied       *metric.Counter
-	RaftLogCommitLatency      *metric.Histogram
-	RaftCommandCommitLatency  *metric.Histogram
-	RaftHandleReadyLatency    *metric.Histogram
-	RaftApplyCommittedLatency *metric.Histogram
-	RaftSchedulerLatency      *metric.Histogram
+	RaftLogCommitLatency      *metric.HistogramV2
+	RaftCommandCommitLatency  *metric.HistogramV2
+	RaftHandleReadyLatency    *metric.HistogramV2
+	RaftApplyCommittedLatency *metric.HistogramV2
+	RaftSchedulerLatency      *metric.HistogramV2
 	RaftTimeoutCampaign       *metric.Counter
 
 	// Raft message metrics.
@@ -1875,8 +1875,8 @@ type StoreMetrics struct {
 	ReplicaCircuitBreakerCumTripped *metric.Counter
 
 	// Replica batch evaluation metrics.
-	ReplicaReadBatchEvaluationLatency  *metric.Histogram
-	ReplicaWriteBatchEvaluationLatency *metric.Histogram
+	ReplicaReadBatchEvaluationLatency  *metric.HistogramV2
+	ReplicaWriteBatchEvaluationLatency *metric.HistogramV2
 }
 
 type tenantMetricsRef struct {
@@ -2236,19 +2236,28 @@ func newStoreMetrics(histogramWindow time.Duration) *StoreMetrics {
 
 		// Raft processing metrics.
 		RaftTicks: metric.NewCounter(metaRaftTicks),
-		RaftQuotaPoolPercentUsed: metric.NewHistogram(
-			// NB: this results in 64 buckets (i.e. 64 timeseries in prometheus).
-			metaRaftQuotaPoolPercentUsed, histogramWindow, 100 /* maxVal */, 1, /* sigFigs */
+		RaftQuotaPoolPercentUsed: metric.NewHistogramV2(
+			metaRaftQuotaPoolPercentUsed, histogramWindow, metric.PercentBuckets,
 		),
-		RaftWorkingDurationNanos:  metric.NewCounter(metaRaftWorkingDurationNanos),
-		RaftTickingDurationNanos:  metric.NewCounter(metaRaftTickingDurationNanos),
-		RaftCommandsApplied:       metric.NewCounter(metaRaftCommandsApplied),
-		RaftLogCommitLatency:      metric.NewLatency(metaRaftLogCommitLatency, histogramWindow),
-		RaftCommandCommitLatency:  metric.NewLatency(metaRaftCommandCommitLatency, histogramWindow),
-		RaftHandleReadyLatency:    metric.NewLatency(metaRaftHandleReadyLatency, histogramWindow),
-		RaftApplyCommittedLatency: metric.NewLatency(metaRaftApplyCommittedLatency, histogramWindow),
-		RaftSchedulerLatency:      metric.NewLatency(metaRaftSchedulerLatency, histogramWindow),
-		RaftTimeoutCampaign:       metric.NewCounter(metaRaftTimeoutCampaign),
+		RaftWorkingDurationNanos: metric.NewCounter(metaRaftWorkingDurationNanos),
+		RaftTickingDurationNanos: metric.NewCounter(metaRaftTickingDurationNanos),
+		RaftCommandsApplied:      metric.NewCounter(metaRaftCommandsApplied),
+		RaftLogCommitLatency: metric.NewHistogramV2(
+			metaRaftLogCommitLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		RaftCommandCommitLatency: metric.NewHistogramV2(
+			metaRaftCommandCommitLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		RaftHandleReadyLatency: metric.NewHistogramV2(
+			metaRaftHandleReadyLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		RaftApplyCommittedLatency: metric.NewHistogramV2(
+			metaRaftApplyCommittedLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		RaftSchedulerLatency: metric.NewHistogramV2(
+			metaRaftSchedulerLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		RaftTimeoutCampaign: metric.NewCounter(metaRaftTimeoutCampaign),
 
 		// Raft message metrics.
 		RaftRcvdMessages: [...]*metric.Counter{
@@ -2386,8 +2395,12 @@ func newStoreMetrics(histogramWindow time.Duration) *StoreMetrics {
 		ReplicaCircuitBreakerCumTripped: metric.NewCounter(metaReplicaCircuitBreakerCumTripped),
 
 		// Replica batch evaluation.
-		ReplicaReadBatchEvaluationLatency:  metric.NewLatency(metaReplicaReadBatchEvaluationLatency, histogramWindow),
-		ReplicaWriteBatchEvaluationLatency: metric.NewLatency(metaReplicaWriteBatchEvaluationLatency, histogramWindow),
+		ReplicaReadBatchEvaluationLatency: metric.NewHistogramV2(
+			metaReplicaReadBatchEvaluationLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
+		ReplicaWriteBatchEvaluationLatency: metric.NewHistogramV2(
+			metaReplicaWriteBatchEvaluationLatency, histogramWindow, metric.IOLatencyBuckets,
+		),
 	}
 
 	{

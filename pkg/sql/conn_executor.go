@@ -444,16 +444,21 @@ func makeMetrics(internal bool) Metrics {
 			SQLOptPlanCacheHits:   metric.NewCounter(getMetricMeta(MetaSQLOptPlanCacheHits, internal)),
 			SQLOptPlanCacheMisses: metric.NewCounter(getMetricMeta(MetaSQLOptPlanCacheMisses, internal)),
 			// TODO(mrtracy): See HistogramWindowInterval in server/config.go for the 6x factor.
-			DistSQLExecLatency: metric.NewLatency(getMetricMeta(MetaDistSQLExecLatency, internal),
-				6*metricsSampleInterval),
-			SQLExecLatency: metric.NewLatency(getMetricMeta(MetaSQLExecLatency, internal),
-				6*metricsSampleInterval),
-			DistSQLServiceLatency: metric.NewLatency(getMetricMeta(MetaDistSQLServiceLatency, internal),
-				6*metricsSampleInterval),
-			SQLServiceLatency: metric.NewLatency(getMetricMeta(MetaSQLServiceLatency, internal),
-				6*metricsSampleInterval),
-			SQLTxnLatency: metric.NewLatency(getMetricMeta(MetaSQLTxnLatency, internal),
-				6*metricsSampleInterval),
+			DistSQLExecLatency: metric.NewHistogramV2(
+				getMetricMeta(MetaDistSQLExecLatency, internal), 6*metricsSampleInterval, metric.IOLatencyBuckets,
+			),
+			SQLExecLatency: metric.NewHistogramV2(
+				getMetricMeta(MetaSQLExecLatency, internal), 6*metricsSampleInterval, metric.IOLatencyBuckets,
+			),
+			DistSQLServiceLatency: metric.NewHistogramV2(
+				getMetricMeta(MetaDistSQLServiceLatency, internal), 6*metricsSampleInterval, metric.IOLatencyBuckets,
+			),
+			SQLServiceLatency: metric.NewHistogramV2(
+				getMetricMeta(MetaSQLServiceLatency, internal), 6*metricsSampleInterval, metric.IOLatencyBuckets,
+			),
+			SQLTxnLatency: metric.NewHistogramV2(
+				getMetricMeta(MetaSQLTxnLatency, internal), 6*metricsSampleInterval, metric.IOLatencyBuckets,
+			),
 			SQLTxnsOpen:         metric.NewGauge(getMetricMeta(MetaSQLTxnsOpen, internal)),
 			SQLActiveStatements: metric.NewGauge(getMetricMeta(MetaSQLActiveQueries, internal)),
 			SQLContendedTxns:    metric.NewCounter(getMetricMeta(MetaSQLTxnContended, internal)),
@@ -477,29 +482,27 @@ func makeMetrics(internal bool) Metrics {
 func makeServerMetrics(cfg *ExecutorConfig) ServerMetrics {
 	return ServerMetrics{
 		StatsMetrics: StatsMetrics{
-			SQLStatsMemoryMaxBytesHist: metric.NewHistogram(
+			SQLStatsMemoryMaxBytesHist: metric.NewHistogramV2(
 				MetaSQLStatsMemMaxBytes,
 				cfg.HistogramWindowInterval,
-				log10int64times1000,
-				3, /* sigFigs */
+				metric.MemoryUsageBuckets,
 			),
 			SQLStatsMemoryCurBytesCount: metric.NewGauge(MetaSQLStatsMemCurBytes),
-			ReportedSQLStatsMemoryMaxBytesHist: metric.NewHistogram(
+			ReportedSQLStatsMemoryMaxBytesHist: metric.NewHistogramV2(
 				MetaReportedSQLStatsMemMaxBytes,
 				cfg.HistogramWindowInterval,
-				log10int64times1000,
-				3, /* sigFigs */
+				metric.MemoryUsageBuckets,
 			),
 			ReportedSQLStatsMemoryCurBytesCount: metric.NewGauge(MetaReportedSQLStatsMemCurBytes),
 			DiscardedStatsCount:                 metric.NewCounter(MetaDiscardedSQLStats),
 			SQLStatsFlushStarted:                metric.NewCounter(MetaSQLStatsFlushStarted),
 			SQLStatsFlushFailure:                metric.NewCounter(MetaSQLStatsFlushFailure),
-			SQLStatsFlushDuration: metric.NewLatency(
-				MetaSQLStatsFlushDuration, 6*metricsSampleInterval,
+			SQLStatsFlushDuration: metric.NewHistogramV2(
+				MetaSQLStatsFlushDuration, 6*metricsSampleInterval, metric.IOLatencyBuckets,
 			),
 			SQLStatsRemovedRows: metric.NewCounter(MetaSQLStatsRemovedRows),
-			SQLTxnStatsCollectionOverhead: metric.NewLatency(
-				MetaSQLTxnStatsCollectionOverhead, 6*metricsSampleInterval,
+			SQLTxnStatsCollectionOverhead: metric.NewHistogramV2(
+				MetaSQLTxnStatsCollectionOverhead, 6*metricsSampleInterval, metric.IOLatencyBuckets,
 			),
 		},
 		ContentionSubsystemMetrics: txnidcache.NewMetrics(),

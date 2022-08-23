@@ -76,14 +76,14 @@ func TestRegistry(t *testing.T) {
 	topCounter := NewCounter(Metadata{Name: "top.counter"})
 	r.AddMetric(topCounter)
 
-	r.AddMetric(NewHistogram(Metadata{Name: "top.histogram"}, time.Minute, 1000, 3))
+	r.AddMetric(NewHistogramV2(Metadata{Name: "top.histogram"}, time.Minute, CountBuckets))
 
 	r.AddMetric(NewGauge(Metadata{Name: "bottom.gauge"}))
 	ms := &struct {
 		StructGauge         *Gauge
 		StructGauge64       *GaugeFloat64
 		StructCounter       *Counter
-		StructHistogram     *Histogram
+		StructHistogram     *HistogramV2
 		NestedStructGauge   NestedStruct
 		ArrayStructCounters [4]*Counter
 		// Ensure that nil struct values in arrays are safe.
@@ -92,7 +92,7 @@ func TestRegistry(t *testing.T) {
 		privateStructGauge            *Gauge
 		privateStructGauge64          *GaugeFloat64
 		privateStructCounter          *Counter
-		privateStructHistogram        *Histogram
+		privateStructHistogram        *HistogramV2
 		privateNestedStructGauge      NestedStruct
 		privateArrayStructCounters    [2]*Counter
 		NotAMetric                    int
@@ -103,7 +103,7 @@ func TestRegistry(t *testing.T) {
 		StructGauge:     NewGauge(Metadata{Name: "struct.gauge"}),
 		StructGauge64:   NewGaugeFloat64(Metadata{Name: "struct.gauge64"}),
 		StructCounter:   NewCounter(Metadata{Name: "struct.counter"}),
-		StructHistogram: NewHistogram(Metadata{Name: "struct.histogram"}, time.Minute, 1000, 3),
+		StructHistogram: NewHistogramV2(Metadata{Name: "struct.histogram"}, time.Minute, CountBuckets),
 		NestedStructGauge: NestedStruct{
 			NestedStructGauge: NewGauge(Metadata{Name: "nested.struct.gauge"}),
 		},
@@ -122,7 +122,7 @@ func TestRegistry(t *testing.T) {
 		privateStructGauge:     NewGauge(Metadata{Name: "private.struct.gauge"}),
 		privateStructGauge64:   NewGaugeFloat64(Metadata{Name: "private.struct.gauge64"}),
 		privateStructCounter:   NewCounter(Metadata{Name: "private.struct.counter"}),
-		privateStructHistogram: NewHistogram(Metadata{Name: "private.struct.histogram"}, time.Minute, 1000, 3),
+		privateStructHistogram: NewHistogramV2(Metadata{Name: "private.struct.histogram"}, time.Minute, CountBuckets),
 		privateNestedStructGauge: NestedStruct{
 			NestedStructGauge: NewGauge(Metadata{Name: "private.nested.struct.gauge"}),
 		},

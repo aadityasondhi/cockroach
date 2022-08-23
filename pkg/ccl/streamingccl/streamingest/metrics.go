@@ -113,9 +113,9 @@ type Metrics struct {
 	Flushes                     *metric.Counter
 	JobProgressUpdates          *metric.Counter
 	ResolvedEvents              *metric.Counter
-	FlushHistNanos              *metric.Histogram
-	CommitLatency               *metric.Histogram
-	AdmitLatency                *metric.Histogram
+	FlushHistNanos              *metric.HistogramV2
+	CommitLatency               *metric.HistogramV2
+	AdmitLatency                *metric.HistogramV2
 	RunningCount                *metric.Gauge
 	EarliestDataCheckpointSpan  *metric.Gauge
 	LatestDataCheckpointSpan    *metric.Gauge
@@ -134,12 +134,12 @@ func MakeMetrics(histogramWindow time.Duration) metric.Struct {
 		Flushes:            metric.NewCounter(metaStreamingFlushes),
 		ResolvedEvents:     metric.NewCounter(metaStreamingResolvedEventsIngested),
 		JobProgressUpdates: metric.NewCounter(metaJobProgressUpdates),
-		FlushHistNanos: metric.NewHistogram(metaStreamingFlushHistNanos,
-			histogramWindow, streamingFlushHistMaxLatency.Nanoseconds(), 1),
-		CommitLatency: metric.NewHistogram(metaStreamingCommitLatency,
-			histogramWindow, streamingCommitLatencyMaxValue.Nanoseconds(), 1),
-		AdmitLatency: metric.NewHistogram(metaStreamingAdmitLatency,
-			histogramWindow, streamingAdmitLatencyMaxValue.Nanoseconds(), 1),
+		FlushHistNanos: metric.NewHistogramV2(metaStreamingFlushHistNanos,
+			histogramWindow, metric.BatchProcessLatencyBuckets),
+		CommitLatency: metric.NewHistogramV2(metaStreamingCommitLatency,
+			histogramWindow, metric.BatchProcessLatencyBuckets),
+		AdmitLatency: metric.NewHistogramV2(metaStreamingAdmitLatency,
+			histogramWindow, metric.BatchProcessLatencyBuckets),
 		RunningCount:                metric.NewGauge(metaStreamsRunning),
 		EarliestDataCheckpointSpan:  metric.NewGauge(metaEarliestDataCheckpointSpan),
 		LatestDataCheckpointSpan:    metric.NewGauge(metaLatestDataCheckpointSpan),

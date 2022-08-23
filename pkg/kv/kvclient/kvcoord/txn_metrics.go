@@ -31,14 +31,14 @@ type TxnMetrics struct {
 	RefreshMemoryLimitExceeded    *metric.Counter
 	RefreshAutoRetries            *metric.Counter
 
-	Durations *metric.Histogram
+	Durations *metric.HistogramV2
 
 	TxnsWithCondensedIntents      *metric.Counter
 	TxnsWithCondensedIntentsGauge *metric.Gauge
 	TxnsRejectedByLockSpanBudget  *metric.Counter
 
 	// Restarts is the number of times we had to restart the transaction.
-	Restarts *metric.Histogram
+	Restarts *metric.HistogramV2
 
 	// Counts of restart types.
 	RestartsWriteTooOld            telemetry.CounterWithMetric
@@ -274,11 +274,11 @@ func MakeTxnMetrics(histogramWindow time.Duration) TxnMetrics {
 		RefreshFailWithCondensedSpans:  metric.NewCounter(metaRefreshFailWithCondensedSpans),
 		RefreshMemoryLimitExceeded:     metric.NewCounter(metaRefreshMemoryLimitExceeded),
 		RefreshAutoRetries:             metric.NewCounter(metaRefreshAutoRetries),
-		Durations:                      metric.NewLatency(metaDurationsHistograms, histogramWindow),
+		Durations:                      metric.NewHistogramV2(metaDurationsHistograms, histogramWindow, metric.IOLatencyBuckets),
 		TxnsWithCondensedIntents:       metric.NewCounter(metaTxnsWithCondensedIntentSpans),
 		TxnsWithCondensedIntentsGauge:  metric.NewGauge(metaTxnsWithCondensedIntentSpansGauge),
 		TxnsRejectedByLockSpanBudget:   metric.NewCounter(metaTxnsRejectedByLockSpanBudget),
-		Restarts:                       metric.NewHistogram(metaRestartsHistogram, histogramWindow, 100, 3),
+		Restarts:                       metric.NewHistogramV2(metaRestartsHistogram, histogramWindow, metric.CountBuckets),
 		RestartsWriteTooOld:            telemetry.NewCounterWithMetric(metaRestartsWriteTooOld),
 		RestartsWriteTooOldMulti:       telemetry.NewCounterWithMetric(metaRestartsWriteTooOldMulti),
 		RestartsSerializable:           telemetry.NewCounterWithMetric(metaRestartsSerializable),
