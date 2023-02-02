@@ -205,6 +205,8 @@ func (a tenantAuthorizer) authBatch(tenID roachpb.TenantID, args *roachpb.BatchR
 	return checkSpanBounds(rSpan, tenSpan)
 }
 
+// TODO(aaditya) create authTimeSeriesQuery. Validate tenant id in req == TenID
+
 func (a tenantAuthorizer) authGetRangeDescriptors(
 	tenID roachpb.TenantID, args *roachpb.GetRangeDescriptorsRequest,
 ) error {

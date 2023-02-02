@@ -233,6 +233,7 @@ export function receiveMetrics(
   request: TSRequest,
   response: TSResponse,
 ): PayloadAction<WithID<RequestWithResponse>> {
+  console.log(request, response)
   return {
     type: RECEIVE,
     payload: {
@@ -361,7 +362,7 @@ export function* sendRequestBatch(requests: WithID<TSRequest>[]) {
     }
     return;
   }
-
+  console.log(unifiedRequest, response.results)
   // Match each result in the unified response to its corresponding original
   // query. Each request may have sent multiple queries in the batch.
   const results = response.results;
