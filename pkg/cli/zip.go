@@ -144,7 +144,12 @@ func runDebugZip(_ *cobra.Command, args []string) (retErr error) {
 		return err
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	timeout := 10 * time.Second
+	if cliCtx.cmdTimeout != 0 {
+		timeout = cliCtx.cmdTimeout
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	zr := zipCtx.newZipReporter("cluster")
@@ -254,11 +259,6 @@ func runDebugZip(_ *cobra.Command, args []string) (retErr error) {
 				defer func() { retErr = errors.CombineErrors(retErr, sqlConn.Close()) }()
 				s.progress("using SQL connection URL: %s", sqlConn.GetURL())
 				s.done()
-			}
-
-			timeout := 10 * time.Second
-			if cliCtx.cmdTimeout != 0 {
-				timeout = cliCtx.cmdTimeout
 			}
 
 			// Only add tenant prefix for non system tenants.

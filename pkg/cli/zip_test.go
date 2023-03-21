@@ -257,7 +257,7 @@ create table defaultdb."../system"(x int);
 // need the SSL certs dir to run a CLI test securely.
 func TestUnavailableZip(t *testing.T) {
 	defer leaktest.AfterTest(t)()
-	skip.WithIssue(t, 53306, "flaky test")
+	//skip.WithIssue(t, 53306, "flaky test")
 
 	skip.UnderShort(t)
 	// Race builds make the servers so slow that they report spurious
@@ -316,7 +316,7 @@ func TestUnavailableZip(t *testing.T) {
 	stderr = os.Stdout
 
 	// Keep the timeout short so that the test doesn't take forever.
-	out, err := c.RunWithCapture("debug zip --concurrency=1 --cpu-profile-duration=0 " + os.DevNull + " --timeout=.5s")
+	out, err := c.RunWithCapture("debug zip --concurrency=1 --cpu-profile-duration=0 " + os.DevNull + " --timeout=60s")
 	if err != nil {
 		t.Fatal(err)
 	}
