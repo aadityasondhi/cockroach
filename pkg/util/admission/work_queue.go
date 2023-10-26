@@ -814,6 +814,12 @@ func (q *WorkQueue) Admit(ctx context.Context, info WorkInfo) (enabled bool, err
 		if work.heapIndex != -1 {
 			panic(errors.AssertionFailedf("grantee should be removed from heap"))
 		}
+		//log.StructuredEvent(ctx, &eventpb.AdmissionWorkQueueStats{
+		//	StartTimeNanos:  0,
+		//	WaitDuration:    0,
+		//	WorkKind:        "",
+		//	DeadlineExpired: false,
+		//})
 		log.Eventf(ctx, "admitted, waited in %s queue for %v", workKindString(q.workKind), waitDur)
 		q.granter.continueGrantChain(chainID)
 		return true, nil
