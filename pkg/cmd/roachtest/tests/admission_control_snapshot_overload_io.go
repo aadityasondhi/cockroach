@@ -30,7 +30,7 @@ func registerSnapshotOverloadIO(r registry.Registry) {
 		Name:             "admission-control/snapshot-overload-io",
 		Owner:            registry.OwnerAdmissionControl,
 		Benchmark:        true,
-		CompatibleClouds: registry.AllClouds,
+		CompatibleClouds: registry.OnlyGCE,
 		Suites:           registry.ManualOnly,
 		Cluster:          r.MakeClusterSpec(4, spec.CPU(4), spec.VolumeSize(2000)),
 		Leases:           registry.MetamorphicLeases,
