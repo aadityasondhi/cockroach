@@ -84,7 +84,7 @@ func registerElasticControlForBackups(r registry.Registry) {
 					defer db.Close()
 
 					t.Status(fmt.Sprintf("during: enabling admission control (<%s)", 30*time.Second))
-					setAdmissionControl(ctx, t, c, true)
+					setAdmissionControl(ctx, t, c, false)
 
 					m := c.NewMonitor(ctx, c.Range(1, crdbNodes))
 					m.Go(func(ctx context.Context) error {
