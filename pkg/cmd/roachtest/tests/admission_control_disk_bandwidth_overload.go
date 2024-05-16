@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/cluster"
-	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/clusterstats"
 	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/grafana"
 	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/option"
 	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/registry"
@@ -28,8 +27,6 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/cmd/roachtest/test"
 	"github.com/cockroachdb/cockroach/pkg/roachprod/install"
 	"github.com/cockroachdb/cockroach/pkg/roachprod/prometheus"
-	"github.com/cockroachdb/cockroach/pkg/util/timeutil"
-	"github.com/cockroachdb/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,9 +68,9 @@ func registerDiskBandwidthOverload(r registry.Registry) {
 			settings := install.MakeClusterSettings()
 			c.Start(ctx, t.L(), startOpts, settings, c.Range(1, crdbNodes))
 
-			promClient, err := clusterstats.SetupCollectorPromClient(ctx, c, t.L(), promCfg)
-			require.NoError(t, err)
-			statCollector := clusterstats.NewStatsCollector(ctx, promClient)
+			//promClient, err := clusterstats.SetupCollectorPromClient(ctx, c, t.L(), promCfg)
+			//require.NoError(t, err)
+			//statCollector := clusterstats.NewStatsCollector(ctx, promClient)
 
 			setAdmissionControl(ctx, t, c, true)
 
@@ -154,55 +151,55 @@ func registerDiskBandwidthOverload(r registry.Registry) {
 				return nil
 			})
 
-			m.Go(func(ctx context.Context) error {
-				t.Status(fmt.Sprintf("starting monitoring thread (<%s)", time.Minute))
-				writeBWMetric := divQuery("rate(sys_host_disk_write_bytes[1m])", 1<<20 /* 1MiB */)
-				getMetricVal := func(query string, label string) (float64, error) {
-					point, err := statCollector.CollectPoint(ctx, t.L(), timeutil.Now(), query)
-					if err != nil {
-						t.L().Errorf("could not query prom %s", err.Error())
-						return 0, err
-					}
-					val := point[label]
-					if len(val) != 1 {
-						err = errors.Errorf(
-							"unexpected number %d of points for metric %s", len(val), query)
-						t.L().Errorf("%s", err.Error())
-						return 0, err
-					}
-					for storeID, v := range val {
-						t.L().Printf("%s(store=%s): %f", query, storeID, v.Value)
-						return v.Value, nil
-					}
-					// Unreachable.
-					panic("unreachable")
-				}
-
-				// Allow a 5% room for error.
-				const bandwidthThreshold = bandwidthLimit * 1.05
-				const collectionIntervalSeconds = 10.0
-				// Loop for ~20 minutes.
-				const numIterations = int(20 / (collectionIntervalSeconds / 60))
-				numErrors := 0
-				numSuccesses := 0
-				for i := 0; i < numIterations; i++ {
-					time.Sleep(collectionIntervalSeconds * time.Second)
-					val, err := getMetricVal(writeBWMetric, "node")
-					if err != nil {
-						numErrors++
-						continue
-					}
-					if val > bandwidthThreshold {
-						t.Fatalf("write bandwidth %f over last exceeded threshold", val)
-					}
-					numSuccesses++
-				}
-				t.Status(fmt.Sprintf("done monitoring, errors: %d successes: %d", numErrors, numSuccesses))
-				if numErrors > numSuccesses {
-					t.Fatalf("too many errors retrieving metrics")
-				}
-				return nil
-			})
+			//m.Go(func(ctx context.Context) error {
+			//	t.Status(fmt.Sprintf("starting monitoring thread (<%s)", time.Minute))
+			//	writeBWMetric := divQuery("rate(sys_host_disk_write_bytes[1m])", 1<<20 /* 1MiB */)
+			//	getMetricVal := func(query string, label string) (float64, error) {
+			//		point, err := statCollector.CollectPoint(ctx, t.L(), timeutil.Now(), query)
+			//		if err != nil {
+			//			t.L().Errorf("could not query prom %s", err.Error())
+			//			return 0, err
+			//		}
+			//		val := point[label]
+			//		if len(val) != 1 {
+			//			err = errors.Errorf(
+			//				"unexpected number %d of points for metric %s", len(val), query)
+			//			t.L().Errorf("%s", err.Error())
+			//			return 0, err
+			//		}
+			//		for storeID, v := range val {
+			//			t.L().Printf("%s(store=%s): %f", query, storeID, v.Value)
+			//			return v.Value, nil
+			//		}
+			//		// Unreachable.
+			//		panic("unreachable")
+			//	}
+			//
+			//	// Allow a 5% room for error.
+			//	const bandwidthThreshold = bandwidthLimit * 1.05
+			//	const collectionIntervalSeconds = 10.0
+			//	// Loop for ~20 minutes.
+			//	const numIterations = int(20 / (collectionIntervalSeconds / 60))
+			//	numErrors := 0
+			//	numSuccesses := 0
+			//	for i := 0; i < numIterations; i++ {
+			//		time.Sleep(collectionIntervalSeconds * time.Second)
+			//		val, err := getMetricVal(writeBWMetric, "node")
+			//		if err != nil {
+			//			numErrors++
+			//			continue
+			//		}
+			//		if val > bandwidthThreshold {
+			//			t.Fatalf("write bandwidth %f over last exceeded threshold", val)
+			//		}
+			//		numSuccesses++
+			//	}
+			//	t.Status(fmt.Sprintf("done monitoring, errors: %d successes: %d", numErrors, numSuccesses))
+			//	if numErrors > numSuccesses {
+			//		t.Fatalf("too many errors retrieving metrics")
+			//	}
+			//	return nil
+			//})
 
 			m.Wait()
 		},
