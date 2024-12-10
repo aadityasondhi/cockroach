@@ -215,6 +215,24 @@ func WorkClassFromStoreWorkType(workType StoreWorkType) WorkClass {
 	return class
 }
 
+func (w StoreWorkType) String() string {
+	return redact.StringWithoutMarkers(w)
+}
+
+// SafeFormat implements the redact.SafeFormatter interface.
+func (w StoreWorkType) SafeFormat(p redact.SafePrinter, verb rune) {
+	switch w {
+	case RegularStoreWorkType:
+		p.Printf("regular")
+	case ElasticStoreWorkType:
+		p.Printf("elastic")
+	case SnapshotIngestStoreWorkType:
+		p.Printf("snapshot")
+	default:
+		p.Printf("<unknown-class>")
+	}
+}
+
 // WorkClassFromPri translates a WorkPriority to its given WorkClass.
 func WorkClassFromPri(pri WorkPriority) WorkClass {
 	class := RegularWorkClass

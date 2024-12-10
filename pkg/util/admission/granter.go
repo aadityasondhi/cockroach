@@ -6,10 +6,12 @@
 package admission
 
 import (
+	"context"
 	"time"
 
 	"github.com/cockroachdb/cockroach/pkg/roachpb"
 	"github.com/cockroachdb/cockroach/pkg/util/admission/admissionpb"
+	"github.com/cockroachdb/cockroach/pkg/util/log"
 	"github.com/cockroachdb/cockroach/pkg/util/metric"
 	"github.com/cockroachdb/cockroach/pkg/util/timeutil"
 	"github.com/cockroachdb/errors"
@@ -424,6 +426,7 @@ func (sg *kvStoreTokenGranter) tryGetLocked(count int64, demuxHandle int8) grant
 			sg.subtractIOTokensLocked(count, count, false)
 			sg.coordMu.diskTokensAvailable.writeByteTokens -= diskWriteTokens
 			sg.coordMu.diskTokensUsed[wt].writeByteTokens += diskWriteTokens
+			log.Infof(context.Background(), "regular: disk write tokens (avail: %d, subtracting: %d, used: %d)", sg.coordMu.diskTokensAvailable.writeByteTokens, diskWriteTokens, sg.coordMu.diskTokensUsed[wt].writeByteTokens)
 			return grantSuccess
 		}
 	case admissionpb.ElasticStoreWorkType:
@@ -434,6 +437,7 @@ func (sg *kvStoreTokenGranter) tryGetLocked(count int64, demuxHandle int8) grant
 			sg.coordMu.elasticIOTokensUsedByElastic += count
 			sg.coordMu.diskTokensAvailable.writeByteTokens -= diskWriteTokens
 			sg.coordMu.diskTokensUsed[wt].writeByteTokens += diskWriteTokens
+			log.Infof(context.Background(), "elastic: disk write tokens (avail: %d, subtracting: %d, used: %d)", sg.coordMu.diskTokensAvailable.writeByteTokens, diskWriteTokens, sg.coordMu.diskTokensUsed[wt].writeByteTokens)
 			return grantSuccess
 		}
 	case admissionpb.SnapshotIngestStoreWorkType:
@@ -442,6 +446,7 @@ func (sg *kvStoreTokenGranter) tryGetLocked(count int64, demuxHandle int8) grant
 		if sg.coordMu.diskTokensAvailable.writeByteTokens > 0 {
 			sg.coordMu.diskTokensAvailable.writeByteTokens -= diskWriteTokens
 			sg.coordMu.diskTokensUsed[wt].writeByteTokens += diskWriteTokens
+			log.Infof(context.Background(), "snapshot: disk write tokens (avail: %d, subtracting: %d, used: %d)", sg.coordMu.diskTokensAvailable.writeByteTokens, diskWriteTokens, sg.coordMu.diskTokensUsed[wt].writeByteTokens)
 			return grantSuccess
 		}
 	}
@@ -560,8 +565,10 @@ func (sg *kvStoreTokenGranter) tryGrantLocked(grantChainID grantChainID) grantRe
 			req = sg.snapshotRequester
 		}
 		if req.hasWaitingRequests() {
+			log.Infof(context.Background(), "%s has waiting requests", admissionpb.StoreWorkType(wt))
 			res := sg.tryGetLocked(1, int8(wt))
 			if res == grantSuccess {
+				log.Infof(context.Background(), "%s grant successs", admissionpb.StoreWorkType(wt))
 				tookTokenCount := req.granted(grantChainID)
 				if tookTokenCount == 0 {
 					// Did not accept grant.
