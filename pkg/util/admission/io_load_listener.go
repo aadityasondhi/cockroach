@@ -783,8 +783,6 @@ func (io *ioLoadListener) adjustTokens(ctx context.Context, metrics StoreMetrics
 			intDiskLoadInfo, diskTokensUsed)
 		io.diskTokensAvailable = tokens
 	}
-	// TODO(aaditya): Decide on whether both bandwidth and IOPS need to be set. If
-	// yes, we should probably log a warning that only one is set.
 	if metrics.DiskStats.ProvisionedBandwidth == 0 ||
 		!DiskBandwidthTokensForElasticEnabled.Get(&io.settings.SV) {
 		io.diskTokensAvailable.writeByteTokens = unlimitedTokens
